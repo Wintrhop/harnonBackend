@@ -9,24 +9,45 @@
  */
 
 export interface Env {
-	harnonDb: D1Database;
-  }
-  
-  export default {
-	async fetch(request: Request, env: Env) {
-	  const { pathname } = new URL(request.url);
-  
-	  if (pathname === "/api/users") {
-		const { results } = await env.harnonDb.prepare(
-		  "SELECT * FROM Users WHERE CompanyName = ?"
-		)
-		  .bind("Bs Beverages")
-		  .all();
-		return Response.json(results);
-	  }
-  
-	  return new Response(
-		"Call /api/beverages to see everyone who works at Bs Beverages"
-	  );
-	},
-  };
+  DB: D1Database;
+}
+type Body = {
+  email: string;
+  password: string;
+  age: string;
+  userName: string;
+  role: string;
+};
+export default {
+  async fetch(request: Request, env: Env) {
+    try {
+      const { pathname } = new URL(request.url);
+      //   const req = await request.json();
+      //   console.log(req);
+
+      if (pathname === "/api/users") {
+        const { results } = await env.DB.prepare("SELECT * FROM Users").all();
+        return Response.json(results);
+      }
+
+      if (pathname === "/api/login") {
+        const { email, password }: Body = await request.json();
+        const userDb: any = await env.DB.prepare(
+          "SELECT * FROM Users WHERE email = ?"
+        )
+          .bind(email)
+          .first();
+        const userDbPass = userDb.UserPassword;
+        if (password === userDbPass){
+          return Response.json(userDb);
+        } else{
+          throw new Error("user could not be login");
+        }
+      }
+
+      return new Response("Call /api/users to see everyone");
+    } catch (err: any) {
+      return new Response(err)
+    }
+  },
+};
