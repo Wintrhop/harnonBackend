@@ -1,3 +1,8 @@
 name = "harnonbackend"
 main = "src/index.ts"
 compatibility_date = "2023-05-10"
+
+[[ d1_databases ]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "harnonDb"
+database_id = "4d83b208-6ac2-47ab-9d28-7db4872b5ae7"
