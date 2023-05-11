@@ -20,6 +20,11 @@ type Body = {
 };
 export default {
   async fetch(request: Request, env: Env) {
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Max-Age": "*",
+    };
     try {
       const { pathname } = new URL(request.url);
       //   const req = await request.json();
@@ -27,7 +32,7 @@ export default {
 
       if (pathname === "/api/users") {
         const { results } = await env.DB.prepare("SELECT * FROM Users").all();
-        return Response.json(results);
+        return new Response(JSON.stringify(results), { headers: corsHeaders });
       }
 
       if (pathname === "/api/login") {
@@ -43,9 +48,9 @@ export default {
             message: "successfuly login",
             ...userDb,
           });
-          return new Response(userfound);
+          return new Response(userfound, { headers: corsHeaders });
         } else {
-          throw new Error("user could not be login");
+          throw new Error("User could not be login");
         }
       }
 
@@ -79,7 +84,7 @@ export default {
           message: "User created successfully",
           ...userDb,
         });
-        return new Response(userfound, { status: 201 });
+        return new Response(userfound, { status: 201, headers: corsHeaders });
       }
       return new Response("Call /api/users to see everyone");
     } catch (err: any) {
