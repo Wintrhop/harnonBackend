@@ -37,7 +37,7 @@ export default {
         )
           .bind(email)
           .first();
-        const userDbPass = userDb.UserPassword;
+        const userDbPass = userDb.userPassword;
         if (password === userDbPass) {
           const userfound = JSON.stringify({
             message: "successfuly login",
@@ -52,13 +52,19 @@ export default {
       if (pathname === "/api/signup") {
         const { email, password, userName, age, role }: Body =
           await request.json();
-          
-        const {success}: any = await env.DB.prepare(
-          'INSERT INTO Users (email, userPassword, userName, age, userRole) VALUES (?1, ?2, ?3, ?4, ?5)'
+        const userDbPrev: any = await env.DB.prepare(
+          "SELECT * FROM Users WHERE email = ?"
+        )
+          .bind(email)
+          .first();
+        if (userDbPrev) throw new Error("Email already exist");
+
+        const { success }: any = await env.DB.prepare(
+          "INSERT INTO Users (email, userPassword, userName, age, userRole) VALUES (?1, ?2, ?3, ?4, ?5)"
         )
           .bind(email, password, userName, age, role)
           .run();
-          
+
         if (!success) {
           throw new Error("User could not be Created");
         }
@@ -71,7 +77,7 @@ export default {
 
         const userfound = JSON.stringify({
           message: "User created successfully",
-          ...userDb
+          ...userDb,
         });
         return new Response(userfound, { status: 201 });
       }
