@@ -88,7 +88,7 @@ export default {
       }
       return new Response("Call /api/users to see everyone");
     } catch (err: any) {
-      return new Response(err, { status: 400 });
+      return new Response(err, { status: 400, headers:corsHeaders });
     }
   },
 };
