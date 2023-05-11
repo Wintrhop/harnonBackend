@@ -38,16 +38,46 @@ export default {
           .bind(email)
           .first();
         const userDbPass = userDb.UserPassword;
-        if (password === userDbPass){
-          return Response.json(userDb);
-        } else{
+        if (password === userDbPass) {
+          const userfound = JSON.stringify({
+            message: "successfuly login",
+            ...userDb,
+          });
+          return new Response(userfound);
+        } else {
           throw new Error("user could not be login");
         }
       }
 
+      if (pathname === "/api/signup") {
+        const { email, password, userName, age, role }: Body =
+          await request.json();
+          
+        const {success}: any = await env.DB.prepare(
+          'INSERT INTO Users (email, userPassword, userName, age, userRole) VALUES (?1, ?2, ?3, ?4, ?5)'
+        )
+          .bind(email, password, userName, age, role)
+          .run();
+          
+        if (!success) {
+          throw new Error("User could not be Created");
+        }
+
+        const userDb: any = await env.DB.prepare(
+          "SELECT * FROM Users WHERE email = ?"
+        )
+          .bind(email)
+          .first();
+
+        const userfound = JSON.stringify({
+          message: "User created successfully",
+          ...userDb
+        });
+        return new Response(userfound, { status: 201 });
+      }
       return new Response("Call /api/users to see everyone");
     } catch (err: any) {
-      return new Response(err)
+      return new Response(err, { status: 400 });
     }
   },
 };
